@@ -26,7 +26,7 @@ This bot helps manage equipment purchase requests within an organization through
    ```
 4. Create a `.env` file in the project root with your Telegram bot token:
    ```
-   TELEGRAM_BOT_TOKEN=7726173970:AAEtsZi1iw5_uDODH53TZgfTaifNvVqB5EE
+   TELEGRAM_BOT_TOKEN=<your token>
    ```
 5. Run the bot:
    ```bash
