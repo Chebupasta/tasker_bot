@@ -22,7 +22,7 @@ engine = create_engine('sqlite:///requests.db')
 Session = sessionmaker(bind=engine)
 
 # Токен нашего бота
-TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')  # API токен теперь берется из переменной окружения
+TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '7940477955:AAEnl-Z7avynliDKhnNHeITHMZnk43sh4s0')  # API токен теперь берется из переменной окружения
 
 # Состояния для создания заявки
 EQUIPMENT, QUANTITY, DESCRIPTION, PRIORITY = range(4)
@@ -94,7 +94,7 @@ def get_main_menu_keyboard(is_admin):
         ]
     else:
         keyboard = [
-            ["📋 Мои заявки", "📊 Статистика"],
+            ["📋 Мои заявки"],
             ["❓ Помощь"]
         ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
@@ -125,14 +125,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Если пользователь уже есть, приветствуем его
             role = "администратор" if user.is_admin else "сотрудник"
             await update.message.reply_text(
-                f"👋 Привет, {role}! Используйте меню ниже для работы с заявками.",
+                f"👋 Здравствуйте, {role}! Для работы с заявками используйте меню ниже.",
                 reply_markup=get_main_menu_keyboard(user.is_admin)
             )
             
     except Exception as e:
         # Если что-то пошло не так, пишем в лог и сообщаем пользователю
         logger.error(f"Ошибка в start: {e}")
-        await update.message.reply_text("😔 К сожалению, произошла ошибка при запуске. Пожалуйста, попробуйте позже или обратитесь к администратору.")
+        await update.message.reply_text("Произошла ошибка при запуске. Попробуйте ещё раз или обратитесь к администратору.")
     finally:
         session.close()
 
@@ -169,7 +169,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     except Exception as e:
         logger.error(f"Ошибка в help: {e}")
-        await update.message.reply_text("😔 К сожалению, произошла ошибка при загрузке справки. Пожалуйста, попробуйте позже.")
+        await update.message.reply_text("Произошла ошибка при загрузке справки. Попробуйте позже.")
     finally:
         session.close()
 
@@ -182,9 +182,7 @@ async def create_request(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Проверяем, админ ли пользователь
         if not user or not user.is_admin:
             await update.message.reply_text(
-                "🔒 Доступ ограничен\n\n"
-                "К сожалению, создавать заявки могут только администраторы системы. "
-                "Если вам нужна помощь, обратитесь к администратору.",
+                "Доступ к созданию заявок разрешён только администраторам. Если вам нужна помощь, обратитесь к администратору.",
                 reply_markup=get_main_menu_keyboard(False)
             )
             return ConversationHandler.END
@@ -194,13 +192,13 @@ async def create_request(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # Просим ввести название оборудования
         await update.message.reply_text(
-            "Введите название оборудования или материала:"
+            "Введите, пожалуйста, название оборудования или материала:"
         )
         return EQUIPMENT
         
     except Exception as e:
         logger.error(f"Ошибка в create_request: {e}")
-        await update.message.reply_text("😔 Произошла ошибка при создании заявки. Пожалуйста, попробуйте позже.")
+        await update.message.reply_text("Произошла ошибка при создании заявки. Попробуйте позже.")
         return ConversationHandler.END
     finally:
         session.close()
@@ -217,13 +215,13 @@ async def equipment(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # Просим ввести количество
         await update.message.reply_text(
-            "Количество должно быть больше нуля. Введите корректное число:"
+            "Пожалуйста, введите количество (целое число больше нуля):"
         )
         return QUANTITY
         
     except Exception as e:
         logger.error(f"Ошибка в equipment: {e}")
-        await update.message.reply_text("😔 Произошла ошибка. Пожалуйста, попробуйте позже.")
+        await update.message.reply_text("Произошла ошибка. Попробуйте ещё раз.")
         return ConversationHandler.END
 
 # Обработчик ввода количества
@@ -237,12 +235,12 @@ async def quantity(update: Update, context: ContextTypes.DEFAULT_TYPE):
             quantity = int(update.message.text)
             if quantity <= 0:
                 await update.message.reply_text(
-                    "Количество должно быть больше нуля. Введите корректное число:"
+                    "Пожалуйста, введите корректное количество (целое число больше нуля):"
                 )
                 return QUANTITY
             context.user_data['quantity'] = quantity
             await update.message.reply_text(
-                "Теперь введите подробное описание заявки:"
+                "Теперь опишите, пожалуйста, суть заявки:"
             )
             return DESCRIPTION
         except ValueError:
@@ -253,7 +251,7 @@ async def quantity(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
     except Exception as e:
         logger.error(f"Ошибка в quantity: {e}")
-        await update.message.reply_text("😔 Произошла ошибка. Пожалуйста, попробуйте позже.")
+        await update.message.reply_text("Произошла ошибка. Попробуйте ещё раз.")
         return ConversationHandler.END
 
 # Обработчик ввода описания
@@ -278,7 +276,7 @@ async def description(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
     except Exception as e:
         logger.error(f"Ошибка в description: {e}")
-        await update.message.reply_text("😔 Произошла ошибка. Пожалуйста, попробуйте позже.")
+        await update.message.reply_text("Произошла ошибка. Попробуйте ещё раз.")
         return ConversationHandler.END
 
 # Обработчик выбора приоритета
@@ -307,7 +305,7 @@ async def priority(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             user = session.query(User).filter(User.telegram_id == update.effective_user.id).first()
             if not user:
-                await update.message.reply_text("😔 Пользователь не найден в системе.")
+                await update.message.reply_text("Пользователь не найден в системе.")
                 return
 
             # Создаем новую заявку
@@ -332,7 +330,7 @@ async def priority(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data.clear()
 
             await update.message.reply_text(
-                "Заявка успешно создана! Она появится в списке активных заявок.",
+                "Ваша заявка успешно создана и появится в списке активных заявок.",
                 reply_markup=get_main_menu_keyboard(user.is_admin)
             )
             return ConversationHandler.END
@@ -342,7 +340,7 @@ async def priority(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
     except Exception as e:
         logger.error(f"Ошибка в priority: {e}")
-        await update.message.reply_text("😔 Произошла ошибка при сохранении заявки. Пожалуйста, попробуйте позже.")
+        await update.message.reply_text("Произошла ошибка при сохранении заявки. Попробуйте позже.")
         return ConversationHandler.END
 
 # Обработчик отмены
@@ -363,7 +361,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
     except Exception as e:
         logger.error(f"Ошибка в cancel: {e}")
-        await update.message.reply_text("😔 Произошла ошибка. Пожалуйста, попробуйте позже.")
+        await update.message.reply_text("Произошла ошибка. Попробуйте ещё раз.")
         return ConversationHandler.END
     finally:
         session.close()
@@ -377,7 +375,7 @@ async def list_active_requests(update: Update, context: ContextTypes.DEFAULT_TYP
         
         if not user:
             await update.message.reply_text(
-                "Нет активных заявок.",
+                "У вас нет активных заявок.",
                 reply_markup=get_main_menu_keyboard(user.is_admin)
             )
             return
@@ -391,9 +389,7 @@ async def list_active_requests(update: Update, context: ContextTypes.DEFAULT_TYP
 
         if not requests:
             await update.message.reply_text(
-                "📭 Активных заявок не найдено.\n\n"
-                "Если вы администратор, это означает, что все заявки выполнены или отменены.\n"
-                "Если вы сотрудник, у вас пока нет активных заявок.",
+                "Активных заявок не найдено. Если вы администратор, это значит, что все заявки выполнены или отменены. Если вы сотрудник, у вас пока нет активных заявок.",
                 reply_markup=get_main_menu_keyboard(user.is_admin)
             )
             return
@@ -440,8 +436,7 @@ async def show_completed_requests(update: Update, context: ContextTypes.DEFAULT_
         
         if not user or not user.is_admin:
             await update.message.reply_text(
-                "🔒 Доступ ограничен\n\n"
-                "Просматривать выполненные заявки могут только администраторы системы.",
+                "Доступ к выполненным заявкам разрешён только администраторам.",
                 reply_markup=get_main_menu_keyboard(False)
             )
             return
@@ -456,7 +451,7 @@ async def show_completed_requests(update: Update, context: ContextTypes.DEFAULT_
 
         if not requests:
             await update.message.reply_text(
-                "Нет выполненных заявок за последние 30 дней.",
+                "Выполненных заявок за последние 30 дней не найдено.",
                 reply_markup=get_main_menu_keyboard(True)
             )
             return
@@ -505,7 +500,7 @@ async def show_completed_requests(update: Update, context: ContextTypes.DEFAULT_
 
     except Exception as e:
         logger.error(f"Ошибка в show_completed_requests: {e}")
-        await update.message.reply_text("😔 Произошла ошибка при получении выполненных заявок. Попробуйте позже.")
+        await update.message.reply_text("Произошла ошибка при получении выполненных заявок. Попробуйте позже.")
     finally:
         session.close()
 
@@ -517,8 +512,7 @@ async def show_cancelled_requests(update: Update, context: ContextTypes.DEFAULT_
         
         if not user or not user.is_admin:
             await update.message.reply_text(
-                "🔒 Доступ ограничен\n\n"
-                "Просматривать отмененные заявки могут только администраторы системы.",
+                "Доступ к отменённым заявкам разрешён только администраторам.",
                 reply_markup=get_main_menu_keyboard(False)
             )
             return
@@ -532,7 +526,7 @@ async def show_cancelled_requests(update: Update, context: ContextTypes.DEFAULT_
 
         if not requests:
             await update.message.reply_text(
-                "Нет отменённых заявок за последние 30 дней.",
+                "Отменённых заявок за последние 30 дней не найдено.",
                 reply_markup=get_main_menu_keyboard(True)
             )
             return
@@ -581,7 +575,7 @@ async def show_cancelled_requests(update: Update, context: ContextTypes.DEFAULT_
 
     except Exception as e:
         logger.error(f"Ошибка в show_cancelled_requests: {e}")
-        await update.message.reply_text("😔 Произошла ошибка при получении отменённых заявок. Попробуйте позже.")
+        await update.message.reply_text("Произошла ошибка при получении отменённых заявок. Попробуйте позже.")
     finally:
         session.close()
 
@@ -602,11 +596,11 @@ async def handle_menu_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return await help_command(update, context)
         else:
             await update.message.reply_text(
-                "Неизвестная команда. Используйте меню или кнопку '❓ Помощь'."
+                "Команда не распознана. Пожалуйста, используйте меню или кнопку '❓ Помощь'."
             )
     except Exception as e:
         logger.error(f"Ошибка в handle_menu_click: {e}")
-        await update.message.reply_text("😔 Произошла ошибка при обработке команды. Попробуйте позже.")
+        await update.message.reply_text("Произошла ошибка при обработке команды. Попробуйте позже.")
 
 # Обработчик для inline кнопок
 async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -618,7 +612,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             user = session.query(User).filter(User.telegram_id == update.effective_user.id).first()
             if not user:
-                await query.edit_message_text("😔 Пользователь не найден в системе.")
+                await query.edit_message_text("Пользователь не найден в системе.")
                 return
 
             # Разбираем callback_data
@@ -630,7 +624,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 request = session.query(Request).filter(Request.id == request_id).first()
                 
                 if not request:
-                    await query.edit_message_text("😔 Заявка не найдена в системе.")
+                    await query.edit_message_text("Заявка не найдена в системе.")
                     return
 
                 # Отмечаем заявку как выполненную
@@ -662,7 +656,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 request = session.query(Request).filter(Request.id == request_id).first()
                 
                 if not request:
-                    await query.edit_message_text("😔 Заявка не найдена в системе.")
+                    await query.edit_message_text("Заявка не найдена в системе.")
                     return
 
                 # Отклоняем заявку (переводим в статус отмененных)
@@ -689,7 +683,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 request = session.query(Request).filter(Request.id == request_id).first()
                 
                 if not request:
-                    await query.edit_message_text("😔 Заявка не найдена в системе.")
+                    await query.edit_message_text("Заявка не найдена в системе.")
                     return
 
                 request.status = 'cancelled'
@@ -719,7 +713,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 request = session.query(Request).filter(Request.id == request_id).first()
                 
                 if not request:
-                    await query.edit_message_text("😔 Заявка не найдена в системе.")
+                    await query.edit_message_text("Заявка не найдена в системе.")
                     return
 
                 # Восстанавливаем выполненную заявку в статус "новые"
@@ -747,7 +741,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 request = session.query(Request).filter(Request.id == request_id).first()
                 
                 if not request:
-                    await query.edit_message_text("😔 Заявка не найдена в системе.")
+                    await query.edit_message_text("Заявка не найдена в системе.")
                     return
 
                 # Восстанавливаем заявку из отмененных
@@ -774,7 +768,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 request = session.query(Request).filter(Request.id == request_id).first()
                 
                 if not request:
-                    await query.edit_message_text("😔 Заявка не найдена в системе.")
+                    await query.edit_message_text("Заявка не найдена в системе.")
                     return
 
                 # Удаляем выполненную заявку навсегда
@@ -800,7 +794,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 request = session.query(Request).filter(Request.id == request_id).first()
                 
                 if not request:
-                    await query.edit_message_text("😔 Заявка не найдена в системе.")
+                    await query.edit_message_text("Заявка не найдена в системе.")
                     return
 
                 # Удаляем заявку навсегда
@@ -809,7 +803,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 session.commit()
 
                 await query.edit_message_text(
-                    f"🗑 *Заявка #{request_id} удалена*\n\n"
+                    f"�� *Заявка #{request_id} удалена*\n\n"
                     f"📦 Оборудование: {equipment_name}\n"
                     f"🗑 Заявка удалена навсегда из системы\n"
                     f"📅 Дата удаления: {datetime.now(timezone.utc).strftime('%d.%m.%Y %H:%M')}",
