@@ -22,7 +22,7 @@ engine = create_engine('sqlite:///requests.db')
 Session = sessionmaker(bind=engine)
 
 # Токен нашего бота
-TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '7940477955:AAEnl-Z7avynliDKhnNHeITHMZnk43sh4s0')  # API токен теперь берется из переменной окружения
+TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')  # API токен теперь берется из переменной окружения
 
 # Состояния для создания заявки
 EQUIPMENT, QUANTITY, DESCRIPTION, PRIORITY = range(4)
