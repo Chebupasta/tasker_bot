@@ -22,7 +22,7 @@ engine = create_engine('sqlite:///requests.db')
 Session = sessionmaker(bind=engine)
 
 # Токен нашего бота
-TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')  # API токен теперь берется из переменной окружения
+TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '7940477955:AAEnl-Z7avynliDKhnNHeITHMZnk43sh4s0')  # API токен теперь берется из переменной окружения
 
 # Состояния для создания заявки
 EQUIPMENT, QUANTITY, DESCRIPTION, PRIORITY = range(4)
@@ -90,7 +90,7 @@ def get_main_menu_keyboard(is_admin):
         keyboard = [
             ["📝 Создать заявку", "📋 Активные заявки"],
             ["✅ Выполненные заявки", "❌ Отмененные заявки"],
-            ["📊 Статистика", "❓ Помощь"]
+            ["❓ Помощь"]
         ]
     else:
         keyboard = [
@@ -118,19 +118,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             session.add(user)
             session.commit()
             await update.message.reply_text(
-                "🎉 Добро пожаловать в систему управления заявками!\n\n"
-                "Вы успешно зарегистрированы как сотрудник. "
-                "Теперь вы можете просматривать свои заявки и статистику.\n\n"
-                "💡 Используйте кнопки меню для навигации или нажмите ❓ Помощь для получения справки.",
+                "👋 Добро пожаловать! Вы зарегистрированы как сотрудник. Используйте меню для работы с заявками.",
                 reply_markup=get_main_menu_keyboard(False)
             )
         else:
             # Если пользователь уже есть, приветствуем его
             role = "администратор" if user.is_admin else "сотрудник"
             await update.message.reply_text(
-                f"👋 С возвращением, {role}!\n\n"
-                f"Рад видеть вас снова в системе управления заявками. "
-                f"Все функции доступны через меню ниже.",
+                f"👋 Привет, {role}! Используйте меню ниже для работы с заявками.",
                 reply_markup=get_main_menu_keyboard(user.is_admin)
             )
             
@@ -150,64 +145,21 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if is_admin:
             help_text = (
-                "🤖 *Руководство по использованию системы*\n\n"
-                "🎯 *Основные функции*\n\n"
-                "📝 *Создание новой заявки*\n"
-                "1. Нажмите '📝 Создать заявку'\n"
-                "2. Укажите название оборудования\n"
-                "3. Введите необходимое количество\n"
-                "4. Добавьте подробное описание\n"
-                "5. Выберите приоритет выполнения\n\n"
-                "📋 *Управление заявками*\n"
-                "• '📋 Активные заявки' - просмотр всех активных заявок\n"
-                "• '✅ Выполненные заявки' - история выполненных заявок\n"
-                "• '❌ Отмененные заявки' - отмененные заявки (автоудаление через 30 дней)\n"
-                "• '📊 Статистика' - детальная статистика по всем заявкам\n\n"
-                "⚙️ *Дополнительные возможности*\n"
-                "• Добавление заметок к заявкам\n"
-                "• Установка ожидаемой даты выполнения\n"
-                "• Фильтрация заявок по статусу\n"
-                "• Поиск по номеру заявки\n"
-                "• Управление правами пользователей\n"
-                "• Отслеживание кто принял или отклонил заявку\n\n"
-                "🔧 *Возможности администратора:*\n"
-                "• Создание и управление заявками\n"
-                "• Просмотр всех заявок в системе\n"
-                "• Доступ к статистике и аналитике\n"
-                "• Отслеживание кто принял или отклонил заявку\n\n"
-                "🔧 *Доступные команды*\n"
-                "/start - Перезапуск бота\n"
-                "/help - Показать это руководство\n"
-                "/cancel - Отменить текущее действие\n\n"
-                "💡 *Советы*\n"
-                "• Используйте подробные описания для лучшего понимания задачи\n"
-                "• Правильно выбирайте приоритет для эффективного планирования\n"
-                "• Регулярно проверяйте статистику для контроля работы\n"
-                "• Система автоматически отслеживает кто принял или отклонил заявку"
+                "ℹ️ *Справка администратора*\n\n"
+                "• Создавайте заявки через '📝 Создать заявку'\n"
+                "• Просматривайте все заявки через '📋 Активные заявки'\n"
+                "• Смотрите выполненные и отменённые заявки через соответствующие пункты меню\n"
+                "• Для помощи используйте кнопку '❓ Помощь'\n\n"
+                "Доступные команды:\n/start — начать заново\n/help — справка\n/cancel — отменить действие"
             )
         else:
             help_text = (
-                "🤖 *Руководство пользователя*\n\n"
-                "📋 *Просмотр заявок*\n"
-                "• '📋 Мои заявки' - просмотр всех ваших заявок\n"
-                "• '📊 Статистика' - статистика по вашим заявкам\n\n"
-                "📊 *Статусы заявок*\n"
-                "🆕 *Новые* - заявка создана и ожидает обработки\n"
-                "⏳ *В процессе* - заявка находится в работе\n"
-                "✅ *Выполненные* - заявка успешно выполнена\n"
-                "❌ *Отмененные* - заявка была отменена (автоудаление через 30 дней)\n\n"
-                "🔧 *Доступные действия*\n"
-                "• Вы можете принимать свои заявки\n"
-                "• Вы можете отменять свои заявки, если они еще не взяты в работу\n"
-                "• Администраторы могут видеть кто принял или отклонил заявку\n\n"
-                "🔧 *Доступные команды*\n"
-                "/start - Перезапуск бота\n"
-                "/help - Показать это руководство\n"
-                "/cancel - Отменить текущее действие\n\n"
-                "💡 *Полезная информация*\n"
-                "• Вы можете принять или отклонить свои заявки, если они еще не взяты в работу\n"
-                "• Статистика поможет отследить эффективность ваших запросов\n"
-                "• При возникновении вопросов обращайтесь к администратору"
+                "ℹ️ *Справка пользователя*\n\n"
+                "• Просматривайте все активные заявки через '📋 Активные заявки'\n"
+                "• Принимайте или отклоняйте заявки\n"
+                "• Смотрите выполненные и отменённые заявки через соответствующие пункты меню\n"
+                "• Для помощи используйте кнопку '❓ Помощь'\n\n"
+                "Доступные команды:\n/start — начать заново\n/help — справка\n/cancel — отменить действие"
             )
         
         await update.message.reply_text(
@@ -242,10 +194,7 @@ async def create_request(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # Просим ввести название оборудования
         await update.message.reply_text(
-            "📦 *Создание новой заявки*\n\n"
-            "Пожалуйста, введите название оборудования или материала:",
-            parse_mode='Markdown',
-            reply_markup=ReplyKeyboardMarkup([["❌ Отмена"]], resize_keyboard=True)
+            "Введите название оборудования или материала:"
         )
         return EQUIPMENT
         
@@ -268,7 +217,7 @@ async def equipment(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # Просим ввести количество
         await update.message.reply_text(
-            "🔢 Отлично! Теперь укажите необходимое количество:"
+            "Количество должно быть больше нуля. Введите корректное число:"
         )
         return QUANTITY
         
@@ -288,18 +237,17 @@ async def quantity(update: Update, context: ContextTypes.DEFAULT_TYPE):
             quantity = int(update.message.text)
             if quantity <= 0:
                 await update.message.reply_text(
-                    "⚠️ Количество должно быть больше нуля. Пожалуйста, введите корректное значение:"
+                    "Количество должно быть больше нуля. Введите корректное число:"
                 )
                 return QUANTITY
             context.user_data['quantity'] = quantity
             await update.message.reply_text(
-                "📝 Отлично! Теперь добавьте подробное описание заявки:\n\n"
-                "💡 *Совет:* Чем подробнее описание, тем быстрее и качественнее будет принята заявка."
+                "Теперь введите подробное описание заявки:"
             )
             return DESCRIPTION
         except ValueError:
             await update.message.reply_text(
-                "⚠️ Пожалуйста, введите число. Например: 5, 10, 100"
+                "Пожалуйста, введите число (например: 5, 10, 100):"
             )
             return QUANTITY
             
@@ -323,11 +271,7 @@ async def description(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ["🟢 Низкий", "❌ Отмена"]
         ]
         await update.message.reply_text(
-            "⚡️ Выберите приоритет выполнения заявки:\n\n"
-            "🔴 *Высокий* - срочная заявка, требует немедленного внимания\n"
-            "🟡 *Средний* - обычная заявка, выполняется в порядке очереди\n"
-            "🟢 *Низкий* - не срочная заявка, может быть отложена",
-            parse_mode='Markdown',
+            "Выберите приоритет заявки: 🔴 Высокий, 🟡 Средний или 🟢 Низкий.",
             reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         )
         return PRIORITY
@@ -352,7 +296,7 @@ async def priority(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if update.message.text not in priority_map:
             await update.message.reply_text(
-                "⚠️ Пожалуйста, выберите приоритет из предложенных вариантов."
+                "Пожалуйста, выберите приоритет из предложенных вариантов."
             )
             return PRIORITY
 
@@ -388,13 +332,7 @@ async def priority(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data.clear()
 
             await update.message.reply_text(
-                "🎉 *Заявка успешно создана!*\n\n"
-                f"📋 Номер заявки: #{request_id}\n"
-                f"📦 Оборудование: {equipment_name}\n"
-                f"🔢 Количество: {quantity}\n"
-                f"⚡️ Приоритет: {get_priority_emoji(priority_value)} {priority_value}\n\n"
-                "✅ Заявка добавлена в систему и будет обработана в ближайшее время.",
-                parse_mode='Markdown',
+                "Заявка успешно создана! Она появится в списке активных заявок.",
                 reply_markup=get_main_menu_keyboard(user.is_admin)
             )
             return ConversationHandler.END
@@ -418,8 +356,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data.clear()
 
         await update.message.reply_text(
-            "❌ Создание заявки отменено.\n\n"
-            "Вы можете создать новую заявку в любое время, нажав '📝 Создать заявку'.",
+            "Создание заявки отменено. Вы можете начать заново в любое время.",
             reply_markup=get_main_menu_keyboard(user.is_admin if user else False)
         )
         return ConversationHandler.END
@@ -439,7 +376,10 @@ async def list_active_requests(update: Update, context: ContextTypes.DEFAULT_TYP
         user = session.query(User).filter(User.telegram_id == update.effective_user.id).first()
         
         if not user:
-            await update.message.reply_text("😔 Пользователь не найден в системе.")
+            await update.message.reply_text(
+                "Нет активных заявок.",
+                reply_markup=get_main_menu_keyboard(user.is_admin)
+            )
             return
 
         # Получаем только активные заявки (не выполненные, не отмененные, не удаленные)
@@ -447,10 +387,6 @@ async def list_active_requests(update: Update, context: ContextTypes.DEFAULT_TYP
             Request.is_deleted == False,
             Request.status.in_(['new', 'in_progress'])
         )
-        
-        if not user.is_admin:
-            query = query.filter(Request.user_id == user.id)
-            
         requests = query.order_by(Request.created_at.desc()).all()
 
         if not requests:
@@ -465,28 +401,22 @@ async def list_active_requests(update: Update, context: ContextTypes.DEFAULT_TYP
         # Отправляем каждую заявку отдельным сообщением с кнопками
         for request in requests:
             message = format_request_details(request)
-            
-            # Создаем кнопки управления
             keyboard = []
-            
-            # Только пользователи видят кнопки для своих заявок
+            # Кнопки для всех работников (не только для своих заявок)
             if not user.is_admin:
-                if request.user_id == user.id:
-                    if request.status == 'new':
-                        keyboard.append([
-                            InlineKeyboardButton("✅ Принять", callback_data=f"complete_{request.id}"),
-                            InlineKeyboardButton("❌ Отклонить", callback_data=f"cancel_{request.id}")
-                        ])
-                    elif request.status == 'in_progress':
-                        keyboard.append([
-                            InlineKeyboardButton("✅ Принять", callback_data=f"complete_{request.id}")
-                        ])
-
+                if request.status == 'new':
+                    keyboard.append([
+                        InlineKeyboardButton("✅ Принять", callback_data=f"complete_{request.id}"),
+                        InlineKeyboardButton("❌ Отклонить", callback_data=f"cancel_{request.id}")
+                    ])
+                elif request.status == 'in_progress':
+                    keyboard.append([
+                        InlineKeyboardButton("✅ Принять", callback_data=f"complete_{request.id}")
+                    ])
             if keyboard:
                 reply_markup = InlineKeyboardMarkup(keyboard)
             else:
                 reply_markup = None
-
             await update.message.reply_text(
                 message,
                 parse_mode='Markdown',
@@ -496,7 +426,7 @@ async def list_active_requests(update: Update, context: ContextTypes.DEFAULT_TYP
     except Exception as e:
         logger.error(f"Ошибка в list_active_requests: {str(e)}")
         await update.message.reply_text(
-            "😔 Произошла ошибка при получении списка заявок. Пожалуйста, попробуйте позже.",
+            "Произошла ошибка при получении списка заявок. Попробуйте позже.",
             reply_markup=get_main_menu_keyboard(user.is_admin if user else False)
         )
     finally:
@@ -526,8 +456,7 @@ async def show_completed_requests(update: Update, context: ContextTypes.DEFAULT_
 
         if not requests:
             await update.message.reply_text(
-                "✅ Выполненных заявок не найдено.\n\n"
-                "Это означает, что за последние 30 дней не было выполнено ни одной заявки.",
+                "Нет выполненных заявок за последние 30 дней.",
                 reply_markup=get_main_menu_keyboard(True)
             )
             return
@@ -576,7 +505,7 @@ async def show_completed_requests(update: Update, context: ContextTypes.DEFAULT_
 
     except Exception as e:
         logger.error(f"Ошибка в show_completed_requests: {e}")
-        await update.message.reply_text("😔 Произошла ошибка при получении выполненных заявок. Пожалуйста, попробуйте позже.")
+        await update.message.reply_text("😔 Произошла ошибка при получении выполненных заявок. Попробуйте позже.")
     finally:
         session.close()
 
@@ -603,8 +532,7 @@ async def show_cancelled_requests(update: Update, context: ContextTypes.DEFAULT_
 
         if not requests:
             await update.message.reply_text(
-                "❌ Отмененных заявок не найдено.\n\n"
-                "Это означает, что за последние 30 дней не было отменено ни одной заявки.",
+                "Нет отменённых заявок за последние 30 дней.",
                 reply_markup=get_main_menu_keyboard(True)
             )
             return
@@ -653,7 +581,7 @@ async def show_cancelled_requests(update: Update, context: ContextTypes.DEFAULT_
 
     except Exception as e:
         logger.error(f"Ошибка в show_cancelled_requests: {e}")
-        await update.message.reply_text("😔 Произошла ошибка при получении отмененных заявок. Пожалуйста, попробуйте позже.")
+        await update.message.reply_text("😔 Произошла ошибка при получении отменённых заявок. Попробуйте позже.")
     finally:
         session.close()
 
@@ -670,18 +598,15 @@ async def handle_menu_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return await show_completed_requests(update, context)
         elif update.message.text == "❌ Отмененные заявки":
             return await show_cancelled_requests(update, context)
-        elif update.message.text == "📊 Статистика":
-            return await show_statistics(update, context)
         elif update.message.text == "❓ Помощь":
             return await help_command(update, context)
         else:
             await update.message.reply_text(
-                "🤔 Неизвестная команда\n\n"
-                "Пожалуйста, используйте кнопки меню для навигации или нажмите ❓ Помощь для получения справки."
+                "Неизвестная команда. Используйте меню или кнопку '❓ Помощь'."
             )
     except Exception as e:
         logger.error(f"Ошибка в handle_menu_click: {e}")
-        await update.message.reply_text("😔 Произошла ошибка при обработке команды. Пожалуйста, попробуйте позже.")
+        await update.message.reply_text("😔 Произошла ошибка при обработке команды. Попробуйте позже.")
 
 # Обработчик для inline кнопок
 async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -706,11 +631,6 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 
                 if not request:
                     await query.edit_message_text("😔 Заявка не найдена в системе.")
-                    return
-
-                # Проверяем права доступа
-                if not user.is_admin and request.user_id != user.id:
-                    await query.edit_message_text("🔒 Доступ ограничен\n\nВы можете выполнять только свои заявки.")
                     return
 
                 # Отмечаем заявку как выполненную
@@ -770,11 +690,6 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 
                 if not request:
                     await query.edit_message_text("😔 Заявка не найдена в системе.")
-                    return
-
-                # Отменяем заявку (только владелец может отменить свою заявку)
-                if request.user_id != user.id and not user.is_admin:
-                    await query.edit_message_text("🔒 Доступ ограничен\n\nВы можете отменить только свои заявки.")
                     return
 
                 request.status = 'cancelled'
@@ -978,140 +893,29 @@ def format_request_details(request):
         f"📌 *Заметки:* {request.notes if request.notes else 'Нет заметок'}{action_info}"
     )
 
-def get_request_statistics(session, user_id=None):
-    query = session.query(Request)
-    if user_id:
-        query = query.filter(Request.user_id == user_id)
-    
-    total = query.count()
-    new = query.filter(Request.status == 'new').count()
-    in_progress = query.filter(Request.status == 'in_progress').count()
-    completed = query.filter(Request.status == 'completed').count()
-    cancelled = query.filter(Request.status == 'cancelled').count()
-    
-    return {
-        'total': total,
-        'new': new,
-        'in_progress': in_progress,
-        'completed': completed,
-        'cancelled': cancelled
-    }
-
-async def show_statistics(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    try:
-        session = Session()
-        user = session.query(User).filter(User.telegram_id == update.effective_user.id).first()
-        
-        if not user:
-            await update.message.reply_text("😔 Пользователь не найден в системе.")
-            return
-
-        # Получаем статистику
-        stats = get_request_statistics(session, user.id if not user.is_admin else None)
-        
-        # Формируем сообщение со статистикой
-        if user.is_admin:
-            message = (
-                f"📊 *Общая статистика системы*\n\n"
-                f"📈 *Всего заявок:* {stats['total']}\n"
-                f"🆕 *Новых:* {stats['new']}\n"
-                f"⏳ *В процессе:* {stats['in_progress']}\n"
-                f"✅ *Выполнено:* {stats['completed']}\n"
-                f"❌ *Отменено:* {stats['cancelled']}\n\n"
-            )
-
-            # Добавляем дополнительную статистику для админов
-            total_users = session.query(User).count()
-            active_users = session.query(User).filter(User.created_at >= datetime.now(timezone.utc) - timedelta(days=30)).count()
-            
-            # Статистика по отмененным заявкам
-            thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
-            cancelled_requests = session.query(Request).filter(
-                Request.status == 'cancelled',
-                Request.updated_at >= thirty_days_ago
-            ).count()
-            
-            # Статистика по выполненным заявкам
-            completed_requests = session.query(Request).filter(
-                Request.status == 'completed',
-                Request.completed_at >= thirty_days_ago
-            ).count()
-            
-            message += (
-                f"👥 *Статистика пользователей*\n"
-                f"👤 Всего пользователей: {total_users}\n"
-                f"🟢 Активных за 30 дней: {active_users}\n\n"
-                f"📅 *Статистика за последние 30 дней*\n"
-                f"✅ Выполнено заявок: {completed_requests}\n"
-                f"❌ Отменено заявок: {cancelled_requests}\n\n"
-                f"💡 *Системная информация*\n"
-                f"• Отмененные заявки автоматически удаляются через 30 дней\n"
-                f"• Выполненные заявки автоматически удаляются через 30 дней\n"
-                f"• Система автоматически очищает старые данные для оптимизации"
-            )
-        else:
-            message = (
-                f"📊 *Ваша статистика*\n\n"
-                f"📈 *Всего ваших заявок:* {stats['total']}\n"
-                f"🆕 *Новых:* {stats['new']}\n"
-                f"⏳ *В процессе:* {stats['in_progress']}\n"
-                f"✅ *Выполнено:* {stats['completed']}\n"
-                f"❌ *Отменено:* {stats['cancelled']}\n\n"
-                f"💡 *Полезная информация*\n"
-                "• Вы можете принять или отклонить свои заявки, если они еще не взяты в работу\n"
-                "• Статистика поможет отследить эффективность ваших запросов\n"
-                "• При возникновении вопросов обращайтесь к администратору"
-            )
-
-        await update.message.reply_text(
-            message,
-            parse_mode='Markdown',
-            reply_markup=get_main_menu_keyboard(user.is_admin)
-        )
-
-    except Exception as e:
-        logger.error(f"Ошибка в show_statistics: {e}")
-        await update.message.reply_text("😔 Произошла ошибка при получении статистики. Пожалуйста, попробуйте позже.")
-    finally:
-        session.close()
-
 # Функция для автоматического удаления старых отмененных и выполненных заявок
 def cleanup_old_requests():
     try:
         session = Session()
         thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
-        
         # Находим отмененные заявки старше 30 дней
         old_cancelled_requests = session.query(Request).filter(
             Request.status == 'cancelled',
             Request.updated_at < thirty_days_ago
         ).all()
-        
         # Находим выполненные заявки старше 30 дней
         old_completed_requests = session.query(Request).filter(
             Request.status == 'completed',
             Request.completed_at < thirty_days_ago
         ).all()
-        
-        deleted_cancelled = 0
-        deleted_completed = 0
-        
         for request in old_cancelled_requests:
             session.delete(request)
-            deleted_cancelled += 1
-            
         for request in old_completed_requests:
             session.delete(request)
-            deleted_completed += 1
-        
         session.commit()
         session.close()
-        
-        if deleted_cancelled > 0 or deleted_completed > 0:
-            logger.info(f"🧹 Автоматическая очистка: удалено {deleted_cancelled} старых отмененных и {deleted_completed} старых выполненных заявок")
-            
     except Exception as e:
-        logger.error(f"❌ Ошибка при автоматической очистке старых заявок: {e}")
+        logger.error(f"Ошибка при автоматической очистке старых заявок: {e}")
 
 # Основная функция запуска бота
 def main():
@@ -1147,7 +951,6 @@ def main():
         application.add_handler(MessageHandler(filters.Regex("^(📋 Активные заявки|📋 Мои заявки)$"), list_active_requests))
         application.add_handler(MessageHandler(filters.Regex("^✅ Выполненные заявки$"), show_completed_requests))
         application.add_handler(MessageHandler(filters.Regex("^❌ Отмененные заявки$"), show_cancelled_requests))
-        application.add_handler(MessageHandler(filters.Regex("^📊 Статистика$"), show_statistics))
         application.add_handler(MessageHandler(filters.Regex("^❓ Помощь$"), help_command))
 
         # Обработчик callback-запросов

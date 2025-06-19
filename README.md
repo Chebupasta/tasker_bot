@@ -18,7 +18,15 @@
    cp env.example .env
    # затем отредактируйте .env и вставьте TELEGRAM_BOT_TOKEN
    ```
+<<<<<<< HEAD
 4. Запустите бота:
+=======
+4. Create a `.env` file in the project root with your Telegram bot token:
+   ```
+   TELEGRAM_BOT_TOKEN=<your token>
+   ```
+5. Run the bot:
+>>>>>>> 810f071d5d604bd42eab3c33a291e89643229a67
    ```bash
    python bot.py
    ```
@@ -44,5 +52,36 @@ python manage_admins.py
 ## Вклад
 Pull requests приветствуются! Подробнее — в [CONTRIBUTING.md](CONTRIBUTING.md).
 
+<<<<<<< HEAD
 ## Лицензия
 MIT. Подробнее — в [LICENSE](LICENSE). 
+=======
+### For Regular Users
+- `/start` - Start the bot and get welcome message
+- `/help` - Show help information
+- `/list` - View your requests
+- **NEW**: Can complete their own requests
+- **NEW**: Can cancel their own requests (if not in progress)
+
+## New Features (v2.0)
+
+### User Permissions
+- **Complete Requests**: Users can mark their own requests as completed
+- **Cancel Requests**: Users can cancel their own requests if they haven't been taken into work yet
+
+### Administrator Features
+- **Action Tracking**: Administrators can see who completed or rejected each request
+- **Delete Permissions**: Only administrators can permanently delete requests
+- **Enhanced Visibility**: Full audit trail of who performed what actions
+
+### Database Improvements
+- Added `completed_by_id` field to track who completed requests
+- Added `cancelled_by_id` field to track who rejected/cancelled requests
+- Improved performance with database indexes
+
+## Requirements
+
+- Python 3.8 or higher
+- Telegram account
+- Bot token from @BotFather 
+>>>>>>> 810f071d5d604bd42eab3c33a291e89643229a67
