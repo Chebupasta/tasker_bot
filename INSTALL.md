@@ -2,7 +2,7 @@
 
 1. Скачай проект:
    ```bash
-   git clone <repo-url>
+   git clone https://github.com/Chebupasta/tasker_bot/
    cd tasker_bot
    ```
 2. Установи библиотеки:
