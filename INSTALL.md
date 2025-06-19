@@ -3,7 +3,7 @@
 1. Скачай проект:
    ```bash
    git clone <repo-url>
-   cd it
+   cd tasker_bot
    ```
 2. Установи библиотеки:
    ```bash
